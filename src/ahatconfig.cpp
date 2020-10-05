@@ -34,7 +34,7 @@ bool AhatConfig::readConfig(const char* path)
 
 	std::string data = "";
 	int num = 0;
-	char buf[129];
+	char buf[1024+1];
 
 //#ifdef _WIN32
 	std::ifstream inFile(configPath.c_str());
@@ -47,7 +47,7 @@ bool AhatConfig::readConfig(const char* path)
 
 	while (!inFile.eof()) 
 	{
-		inFile.getline(buf, 128);
+		inFile.getline(buf, 1024);
 		data += buf;
 		data += "\n";
 		
