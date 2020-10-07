@@ -20,14 +20,9 @@ class logParser
 {
 	AhatConfig config;
 
-	std::string logScript;
-	std::string cName;
-	std::string tName;
-	int logNum;
-
 public:
 	logParser();
-	std::string parsing(const char* msg);
+	std::string parsing(const char* msg, std::string tName);
 };
 
 #endif

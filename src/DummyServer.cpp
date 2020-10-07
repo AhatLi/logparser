@@ -51,7 +51,7 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 	int port;
 	ss >> port;
 	
-	reqitem.in_req_body = std::string(buf);
+	reqitem.in_req_body = rBody;
 	makeResult(buf, port, message, reqitem);
     AhatLogger::IN_REQ_DEBUG(CODE, reqitem, result);
 
@@ -76,53 +76,73 @@ std::string DummyServer::makeResult(char* msg, int port, HTTPMessage message, In
 
 	if (!tok)
 	{
-		message.setHeaderCode("404");
+		message.setHeaderCode("400");
 		return message.getMessage();
 	}
 	pro = tok;
 	
 	if	//HTTP 프로토콜인지를 확인함 현재는 사용되지 않음
 	(
-		pro.compare("GET") == 0 ||
-		pro.compare("POST") == 0 ||
-		pro.compare("HEAD") == 0 ||
-		pro.compare("PUT") == 0 ||
-		pro.compare("DELETE") == 0 ||
-		pro.compare("OPTIONS") == 0 ||
-		pro.compare("TRACE") == 0 ||
-		pro.compare("CONNECT") == 0
+	//	pro.compare("GET") == 0 ||
+		!pro.compare("POST") == 0// ||
+	//	pro.compare("HEAD") == 0 ||
+	//	pro.compare("PUT") == 0 ||
+	//	pro.compare("DELETE") == 0 ||
+	//	pro.compare("OPTIONS") == 0 ||
+	//	pro.compare("TRACE") == 0 ||
+	//	pro.compare("CONNECT") == 0
 	)
 	{
-		isHttp = true;
+		message.setHeaderCode("400");
+		return message.getMessage();
 	}
 	
 	tok = strtok_all(NULL, "? \n", &saveptr1);
 	if( !tok )
 	{
-		message.setHeaderCode("404");
+		message.setHeaderCode("400");
 		return message.getMessage();
     }
 
-	std::string path = "";	//API 주소
-	path += tok;
+	std::string url =  tok;
+	url = url.substr(1);
 	reqitem.in_req_url = std::string(tok);
 
-	if (pro.compare("POST") == 0)
+	tok = strtok_all(NULL, "? \n/", &saveptr1);
+	if (strcmp(tok, "HTTP") == 0)
 	{
-		tok = strtok_all(NULL, "? \n/", &saveptr1);
-		if (strcmp(tok, "HTTP") == 0)
-		{
-			bodyText = bodyText.substr(bodyText.find("\r\n\r\n") + 4);
-		}
+		bodyText = bodyText.substr(bodyText.find("\r\n\r\n") + 4);
 	}
 	else
 	{
-		message.setHeaderCode("404");
+		message.setHeaderCode("400");
 		return message.getMessage();
 	}
 
-	std::string sql = parser.parsing(bodyText.c_str());
-	dbp.DBExcuteSQL(sql);
+	std::istringstream ss(bodyText);
+	std::string line;
+
+	std::string sql = "";
+	while (std::getline(ss, line, '\n'))
+	{
+		if (line.empty())
+			continue;
+
+		sql = parser.parsing(line.c_str(), url);
+		dbp.DBExcuteSQL(sql);
+		/*
+		sql += parser.parsing(line.c_str());
+		sql += ";\n";
+		c++;
+
+		if (c >= 100)
+		{
+			//table name : url
+			sql = "";
+			c = 0;
+		}
+		*/
+	}
 	
 	result = sMsg.getMessage();
 	return "";

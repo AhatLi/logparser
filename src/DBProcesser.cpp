@@ -8,12 +8,11 @@ DBProcesser::DBProcesser()
     ODBC_Name = (SQLCHAR*)"mariadb";
     ODBC_ID = (SQLCHAR*)"user";
     ODBC_PW = (SQLCHAR*)"1qw2wa!!@@";
-/*
+
     if (!DBConnect())
     {
         ErrorMSG();
     }
-*/
 }
 
 void DBProcesser::ErrorMSG()
