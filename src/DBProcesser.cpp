@@ -92,7 +92,7 @@ bool DBProcesser::DBExcuteSQL(std::string sql)
 
         if (SQL_SUCCESS == SQLError(hEnv, hDbc, hStmt, NULL, &errNo, errMsg, 1024, &msgLength))
         {
-            printf(" ERR_-%ld : %s?n", errNo, errMsg);
+            printf(" ERR_-%ld : %s\n", errNo, errMsg);
         }
     }
 
