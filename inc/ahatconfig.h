@@ -7,10 +7,10 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include <fstream>
 #elif __linux__
 #include <unistd.h>
 #endif
+#include <fstream>
 #include <fcntl.h>
 
 class AhatConfig
