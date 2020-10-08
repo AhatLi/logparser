@@ -27,9 +27,11 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 {
 	std::string rBody = "";
 	char buf[1024+1];
+	char header[1024];
 	HTTPMessage message;
 
 	memset(buf, 0, 1024 + 1);
+	memset(header, 0, 1024);
 	int ret = recv(client_sock, buf, 1024, 0);
 	while (1)
 	{
@@ -51,18 +53,19 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 	int port;
 	ss >> port;
 	
+	strncat(header, rBody.substr(0, rBody.find("\r\n\r\n")).c_str(), rBody.find("\r\n\r\n"));
+	rBody = rBody.substr(rBody.find("\r\n\r\n") + 4);
+
 	reqitem.in_req_body = rBody;
-	makeResult(buf, port, message, reqitem);
+	makeResult(header, rBody, port, message, reqitem);
     AhatLogger::IN_REQ_DEBUG(CODE, reqitem, result);
 
 	return 0;
 }
 
-std::string DummyServer::makeResult(char* msg, int port, HTTPMessage message, InReqItem& reqitem)
+std::string DummyServer::makeResult(char* header, std::string body, int port, HTTPMessage message, InReqItem& reqitem)
 {
 	std::string result;
-	std::string header;
-	std::string body;
 
 	char* saveptr1;
 	std::string pro;
@@ -71,8 +74,7 @@ std::string DummyServer::makeResult(char* msg, int port, HTTPMessage message, In
 
 	char* tok;
 	bool isHttp = false;
-	std::string bodyText = msg;
-	tok = strtok_all(msg, " ", &saveptr1);
+	tok = strtok_all(header, " ", &saveptr1);
 
 	if (!tok)
 	{
@@ -105,21 +107,17 @@ std::string DummyServer::makeResult(char* msg, int port, HTTPMessage message, In
     }
 
 	std::string url =  tok;
-	url = url.substr(1);
 	reqitem.in_req_url = std::string(tok);
+	url = url.substr(1);
 
-	tok = strtok_all(NULL, "? \n/", &saveptr1);
-	if (strcmp(tok, "HTTP") == 0)
-	{
-		bodyText = bodyText.substr(bodyText.find("\r\n\r\n") + 4);
-	}
-	else
+	if (url.empty())
 	{
 		message.setHeaderCode("400");
 		return message.getMessage();
 	}
 
-	std::istringstream ss(bodyText);
+	tok = strtok_all(NULL, "? \n/", &saveptr1);
+	std::istringstream ss(body);
 	std::string line;
 
 	std::string sql = "";

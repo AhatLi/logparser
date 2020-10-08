@@ -44,7 +44,7 @@
 
 class DummyServer
 {
-	std::string makeResult(char* msg, int port, HTTPMessage message, InReqItem& reqitem);
+	std::string makeResult(char* header, std::string body, int port, HTTPMessage message, InReqItem& reqitem);
 	int client_connect(int client_sock, InReqItem reqitem);
 
 	std::queue<std::pair<int, InReqItem> > q;

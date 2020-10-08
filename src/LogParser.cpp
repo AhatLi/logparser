@@ -7,14 +7,15 @@ logParser::logParser()
 
 std::string logParser::parsing(const char* msg, std::string tName)
 {
-	tName += "_";
-	std::string tmp = tName + "LogScript";
+	std::string cfgTmp = tName;
+	cfgTmp += "_";
+	std::string tmp = cfgTmp + "LogScript";
 	std::string logScript = config.getConfig(tmp);
 
-	tmp = tName + "cName";
+	tmp = cfgTmp + "ColumnName";
 	std::string cName = config.getConfig(tmp);
 
-	tmp = tName + "logNum";
+	tmp = cfgTmp + "LogNum";
 	int logNum = config.getConfigInt(tmp);
 
 	int count = 0;
