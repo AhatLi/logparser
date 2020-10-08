@@ -5,9 +5,15 @@ using namespace std;
 
 DBProcesser::DBProcesser()
 {
-    ODBC_Name = (SQLCHAR*)"mariadb";
-    ODBC_ID = (SQLCHAR*)"user";
-    ODBC_PW = (SQLCHAR*)"1qw2wa!!@@";
+    config.readConfig("./LogParser");
+
+    std::string Name = config.getConfig("ODBC_Name");
+    std::string ID = config.getConfig("ODBC_ID");
+    std::string PW = config.getConfig("ODBC_PW");
+
+    ODBC_Name = (SQLCHAR*)Name.c_str();
+    ODBC_ID = (SQLCHAR*)ID.c_str();
+    ODBC_PW = (SQLCHAR*)PW.c_str();
 
     if (!DBConnect())
     {

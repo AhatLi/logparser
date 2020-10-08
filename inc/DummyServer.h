@@ -39,7 +39,6 @@
 
 #include "HTTPMessage.h"
 #include "ahatlogger.h"
-#include "ahatconfig.h"
 #include "LogParser.h"
 #include "DBProcesser.h"
 

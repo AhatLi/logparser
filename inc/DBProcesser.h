@@ -10,16 +10,10 @@
 #include <sql.h>
 #include <sqlext.h>
 
+#include "ahatconfig.h"
+
 class DBProcesser
 {
-public:
-	DBProcesser();
-	bool DBConnect();
-	void DBDisConnect();
-	bool DBExcuteSQL(std::string sql);
-	void Cleanup();
-	void ErrorMSG();
-
 	SQLHENV hEnv;
 	SQLHDBC hDbc;
 	SQLHSTMT hStmt;
@@ -27,6 +21,16 @@ public:
 	SQLCHAR* ODBC_Name;
 	SQLCHAR* ODBC_ID;
 	SQLCHAR* ODBC_PW;
+
+	AhatConfig config;
+
+	void Cleanup();
+	void ErrorMSG();
+public:
+	DBProcesser();
+	bool DBConnect();
+	void DBDisConnect();
+	bool DBExcuteSQL(std::string sql);
 };
 
 #endif
