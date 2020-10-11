@@ -11,6 +11,7 @@
 #include <sqlext.h>
 
 #include "ahatconfig.h"
+#include "ahatlogger.h"
 
 class DBProcesser
 {

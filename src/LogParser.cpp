@@ -7,16 +7,21 @@ logParser::logParser()
 
 std::string logParser::parsing(const char* msg, std::string tName)
 {
+	AhatLogger::DEBUG(CODE, "msg : %s", msg);
+	AhatLogger::DEBUG(CODE, "table name : %s", tName.c_str());
 	std::string cfgTmp = tName;
 	cfgTmp += "_";
 	std::string tmp = cfgTmp + "LogScript";
 	std::string logScript = config.getConfig(tmp);
+	AhatLogger::DEBUG(CODE, "conf name : [%s] value : %s", tmp.c_str(), logScript.c_str());
 
 	tmp = cfgTmp + "ColumnName";
 	std::string cName = config.getConfig(tmp);
+	AhatLogger::DEBUG(CODE, "conf name : [%s] value : %s", tmp.c_str(), cName.c_str());
 
 	tmp = cfgTmp + "LogNum";
 	int logNum = config.getConfigInt(tmp);
+	AhatLogger::DEBUG(CODE, "conf name : [%s] value : %d", tmp.c_str(), logNum);
 
 	int count = 0;
 
@@ -59,6 +64,8 @@ std::string logParser::parsing(const char* msg, std::string tName)
 	}
 	sql = sql.substr(0, sql.length() - 2);
 	sql += ")";
+
+	AhatLogger::DEBUG(CODE, "sql : %s", sql.c_str());
 
 	for (int i = 0; i < logNum; i++)
 	{

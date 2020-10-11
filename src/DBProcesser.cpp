@@ -86,6 +86,8 @@ void DBProcesser::DBDisConnect()
 bool DBProcesser::DBExcuteSQL(std::string sql)
 {
     RETCODE retcode;
+    InDBtem item;
+    item.db_req_body = sql;
 
     std::wstring wstr = L"hello world";
 
@@ -99,8 +101,11 @@ bool DBProcesser::DBExcuteSQL(std::string sql)
         if (SQL_SUCCESS == SQLError(hEnv, hDbc, hStmt, NULL, &errNo, errMsg, 1024, &msgLength))
         {
             printf(" ERR_-%ld : %s\n", errNo, errMsg);
+            AhatLogger::DB_ERR_DEBUG(CODE, item, std::string((char*)errMsg));
+            return false;
         }
     }
+    AhatLogger::DB_DEBUG(CODE, item, "true");
 
     return true;
 }

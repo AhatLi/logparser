@@ -15,6 +15,7 @@
 #include <queue>
 
 #include "ahatconfig.h"
+#include "ahatlogger.h"
 
 class logParser
 {
