@@ -45,7 +45,6 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 		ret = recv(client_sock, buf, 1024, 0);
 	}
 
-	closeOsSocket(client_sock);
 
 	std::stringstream ss(reqitem.in_req_port);
 	int port;
@@ -60,6 +59,7 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 	}
 
 	send(client_sock, sMsg.getMessage().c_str(), sMsg.getMessage().length(), 0);
+	closeOsSocket(client_sock);
 	strncat(header, rBody.substr(0, rBody.find("\r\n\r\n")).c_str(), rBody.find("\r\n\r\n"));
 	rBody = rBody.substr(rBody.find("\r\n\r\n") + 4);
 
