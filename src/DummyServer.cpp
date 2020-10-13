@@ -45,20 +45,26 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 		ret = recv(client_sock, buf, 1024, 0);
 	}
 
-	std::string result = sMsg.getMessage();
-	send(client_sock, result.c_str(), result.length(), 0);
 	closeOsSocket(client_sock);
 
 	std::stringstream ss(reqitem.in_req_port);
 	int port;
 	ss >> port;
-	
+
+	reqitem.in_req_body = rBody;
+	if (rBody.empty() || rBody.find("\r\n\r\n") == std::string::npos)
+	{
+		send(client_sock, fMsg.getMessage().c_str(), fMsg.getMessage().length(), 0);
+		AhatLogger::IN_REQ_ERR_DEBUG(CODE, reqitem, fMsg.getMessage());
+		return 0;
+	}
+
+	send(client_sock, sMsg.getMessage().c_str(), sMsg.getMessage().length(), 0);
 	strncat(header, rBody.substr(0, rBody.find("\r\n\r\n")).c_str(), rBody.find("\r\n\r\n"));
 	rBody = rBody.substr(rBody.find("\r\n\r\n") + 4);
 
-	reqitem.in_req_body = rBody;
 	makeResult(header, rBody, port, message, reqitem);
-    AhatLogger::IN_REQ_DEBUG(CODE, reqitem, result);
+    AhatLogger::IN_REQ_DEBUG(CODE, reqitem, sMsg.getMessage());
 
 	return 0;
 }

@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
     int client_sock;
     unsigned int i, c = 0;
     int port_size = 0;
+    std::vector<std::shared_ptr<DummyServer> > threads;
 
     bool debug = false;
 
@@ -87,8 +88,6 @@ int main(int argc, char *argv[])
 
         port_size++;
     }
-	
-	std::vector<std::shared_ptr<DummyServer> > threads;
 
     int core = std::thread::hardware_concurrency();
     if (core < 2)
@@ -136,7 +135,6 @@ int main(int argc, char *argv[])
     
     for (int i = 0; i < port_size; i++)
     {
-
 #ifdef _WIN32
         listen_sock[i] = socket(PF_INET, SOCK_STREAM, 0);
         if (listen_sock[i] == INVALID_SOCKET)
