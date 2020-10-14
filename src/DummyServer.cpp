@@ -169,7 +169,7 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 		AhatLogger::INFO(CODE, "test 13-2 %s", getCurTime().c_str());
 		sql = parser.parsing(line.c_str(), url);
 		AhatLogger::INFO(CODE, "test 13-3 %s", getCurTime().c_str());
-	//	dbp.DBExcuteSQL(sql, url);
+		dbp.DBExcuteSQL(sql, url);
 		AhatLogger::INFO(CODE, "test 13-4 %s", getCurTime().c_str());
 		/*
 		sql += parser.parsing(line.c_str());

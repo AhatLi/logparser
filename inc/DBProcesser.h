@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sql.h>
 #include <sqlext.h>
+#include <vector>
 
 #include "ahatconfig.h"
 #include "ahatlogger.h"
@@ -29,10 +30,14 @@ class DBProcesser
 	void ErrorMSG();
 	std::map< std::string, std::string > cmap;
 public:
+	static std::mutex mutex;
+	void start();
 	DBProcesser();
 	bool DBConnect();
 	void DBDisConnect();
 	bool DBExcuteSQL(std::string sql, std::string tName);
+	bool DBProcesser::excuteSQL(std::vector<std::string>* v);
+	std::vector<std::string>* q = NULL;
 };
 
 #endif

@@ -6,6 +6,7 @@ using namespace std;
 DBProcesser::DBProcesser()
 {
     config.readConfig("./LogParser");
+    this->q = new std::queue<std::string>();
 
     for (auto it = config.configmap.begin(); it != config.configmap.end(); it++)
     {
@@ -45,6 +46,31 @@ DBProcesser::DBProcesser()
     {
         ErrorMSG();
     }
+}
+
+void DBProcesser::start()
+{
+    while (1)
+    {
+        if (!q->empty())
+        {
+            mutex.lock();
+
+            std::vector<std::string>* qq = q;
+            q = new std::vector<std::string>();
+
+            mutex.unlock();
+
+            excuteSQL(qq);
+
+        }
+        else
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+    }
+
+    return;
 }
 
 void DBProcesser::ErrorMSG()
@@ -125,6 +151,46 @@ bool DBProcesser::DBExcuteSQL(std::string values, std::string tName)
 
     retcode = SQLExecDirect(hStmt, (SQLCHAR*)sql.c_str(), SQL_NTS);
     if ((retcode != SQL_SUCCESS) && (retcode != SQL_NEED_DATA) && (retcode != SQL_SUCCESS_WITH_INFO)) 
+    {
+        SQLINTEGER errNo;
+        SQLSMALLINT msgLength;
+        SQLCHAR errMsg[1024];
+
+        if (SQL_SUCCESS == SQLError(hEnv, hDbc, hStmt, NULL, &errNo, errMsg, 1024, &msgLength))
+        {
+            printf(" ERR_-%ld : %s\n", errNo, errMsg);
+            AhatLogger::DB_ERR_DEBUG(CODE, item, std::string((char*)errMsg));
+            return false;
+        }
+    }
+    AhatLogger::DB_DEBUG(CODE, item, "true");
+
+    return true;
+}
+
+
+// 해당되는 쿼리 구문 실행 및 출력
+bool DBProcesser::excuteSQL(std::vector<std::string>* v)
+{
+    for (int i = 0; i < v->size(); i++)
+    {
+
+    }
+
+    RETCODE retcode;
+    InDBtem item;
+    std::string sql = "INSERT INTO ";
+    sql += tName;
+    sql += cmap[tName];
+    sql += " VALUES ";
+    sql += values;
+
+    item.db_req_body = sql;
+
+    std::wstring wstr = L"hello world";
+
+    retcode = SQLExecDirect(hStmt, (SQLCHAR*)sql.c_str(), SQL_NTS);
+    if ((retcode != SQL_SUCCESS) && (retcode != SQL_NEED_DATA) && (retcode != SQL_SUCCESS_WITH_INFO))
     {
         SQLINTEGER errNo;
         SQLSMALLINT msgLength;
