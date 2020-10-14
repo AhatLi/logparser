@@ -16,10 +16,10 @@
 class AhatConfig
 {
 private:
-	std::map<std::string, std::string> configmap;
 	std::string trim(std::string str);
 
 public:
+	std::map<std::string, std::string> configmap;
 //	bool readConfig(std::string path);
 	bool readConfig(const char* path);
 

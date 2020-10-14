@@ -21,6 +21,7 @@ class logParser
 {
 	AhatConfig config;
 
+	std::map< std::string, std::vector<int> > cmap;
 public:
 	logParser();
 	std::string parsing(const char* msg, std::string tName);

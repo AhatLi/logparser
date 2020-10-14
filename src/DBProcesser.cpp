@@ -7,6 +7,32 @@ DBProcesser::DBProcesser()
 {
     config.readConfig("./LogParser");
 
+    for (auto it = config.configmap.begin(); it != config.configmap.end(); it++)
+    {
+        if (it->first.find("ColumnName") != std::string::npos)
+        {
+            std::string tname = it->first.substr(0, it->first.find("_ColumnName"));
+            std::istringstream ss(it->second);
+            std::string line;
+            std::string values = "(";
+            std::vector<int> v;
+
+            while (std::getline(ss, line, ','))
+            {
+                if (line.compare("X") != 0)
+                {
+                    values += line;
+                    values += ", ";
+                }
+            }
+
+            values = values.substr(0, values.length() - 2);
+            values += ")";
+
+            cmap[tname] = values;
+        }
+    }
+
     std::string Name = config.getConfig("ODBC_Name");
     std::string ID = config.getConfig("ODBC_ID");
     std::string PW = config.getConfig("ODBC_PW");
@@ -83,10 +109,16 @@ void DBProcesser::DBDisConnect()
 }
 
 // 해당되는 쿼리 구문 실행 및 출력
-bool DBProcesser::DBExcuteSQL(std::string sql)
+bool DBProcesser::DBExcuteSQL(std::string values, std::string tName)
 {
     RETCODE retcode;
     InDBtem item;
+    std::string sql = "INSERT INTO ";
+    sql += tName;
+    sql += cmap[tName];
+    sql += " VALUES ";
+    sql += values;
+
     item.db_req_body = sql;
 
     std::wstring wstr = L"hello world";

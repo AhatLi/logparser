@@ -3,6 +3,29 @@
 logParser::logParser()
 {
 	config.readConfig("./LogParser");
+
+	for (auto it = config.configmap.begin(); it != config.configmap.end(); it++) 
+	{
+		if (it->first.find("ColumnName") != std::string::npos)
+		{			
+			std::string tname = it->first.substr(0, it->first.find("_ColumnName"));
+			std::istringstream ss(it->second);
+			std::string line;
+			std::vector<int> v;
+			int count = 0;
+
+			while (std::getline(ss, line, ','))
+			{
+				if (line.compare("X") != 0)
+				{
+					v.push_back(count);
+				}
+				count++;
+			}
+
+			cmap[tname] = v;
+		}
+	}
 }
 
 std::string logParser::parsing(const char* msg, std::string tName)
@@ -15,36 +38,15 @@ std::string logParser::parsing(const char* msg, std::string tName)
 	std::string logScript = config.getConfig(tmp);
 	AhatLogger::DEBUG(CODE, "conf name : [%s] value : %s", tmp.c_str(), logScript.c_str());
 
-	tmp = cfgTmp + "ColumnName";
-	std::string cName = config.getConfig(tmp);
-	AhatLogger::DEBUG(CODE, "conf name : [%s] value : %s", tmp.c_str(), cName.c_str());
-
 	tmp = cfgTmp + "LogNum";
 	int logNum = config.getConfigInt(tmp);
 	AhatLogger::DEBUG(CODE, "conf name : [%s] value : %d", tmp.c_str(), logNum);
 
 	int count = 0;
 
-	std::string sql = "INSERT INTO ";
-	sql += tName;
-	sql += "(";
+	std::string sql = "(";
 
-	std::istringstream ss(cName);
-	std::string line;
-
-	std::vector<int> v;
-	while (std::getline(ss, line, ','))
-	{
-		if (line.compare("X") != 0)
-		{
-			sql += line;
-			sql += ", ";
-			v.push_back(count);
-		}
-		count++;
-	}
-	sql = sql.substr(0, sql.length()-2);
-	sql += ") VALUES (";
+	auto v = cmap[tName];
 
 	char** p = new char* [logNum];
 	for (int i = 0; i < logNum; i++)

@@ -62,7 +62,6 @@ private:
 	static int level;
 
 	static void run();
-	static std::string getDate();
 
 	static int makeDirectory(const char *full_path);
 	static bool existDirectory(const char *path);
@@ -74,6 +73,7 @@ private:
 public:
 	static std::mutex mutex;
 
+	static std::string getDate();
 	static void setting(std::string path, std::string name, int level);
 	static void start();
 	static void stop();

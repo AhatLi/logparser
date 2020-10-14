@@ -27,11 +27,12 @@ class DBProcesser
 
 	void Cleanup();
 	void ErrorMSG();
+	std::map< std::string, std::string > cmap;
 public:
 	DBProcesser();
 	bool DBConnect();
 	void DBDisConnect();
-	bool DBExcuteSQL(std::string sql);
+	bool DBExcuteSQL(std::string sql, std::string tName);
 };
 
 #endif
