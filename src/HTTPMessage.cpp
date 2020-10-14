@@ -115,7 +115,8 @@ std::string HTTPMessage::getHeader(int bodyLength)
 	
 	header += "\r\nContent-Length: ";
 	header += std::to_string(bodyLength);
-	header += "\r\n\r\n";
+	if(bodyLength != 0)
+		header += "\r\n\r\n";
 
 	return header;
 }

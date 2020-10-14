@@ -45,6 +45,11 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 		ret = recv(client_sock, buf, 1024, 0);
 	}
 
+	if (ret == -1)
+	{
+		int err = WSAGetLastError();
+		AhatLogger::ERR(CODE, "WSAGetLastError CODE = %d", err);
+	}
 
 	std::stringstream ss(reqitem.in_req_port);
 	int port;
@@ -53,7 +58,15 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 	reqitem.in_req_body = rBody;
 	if (rBody.empty() || rBody.find("\r\n\r\n") == std::string::npos)
 	{
-		send(client_sock, fMsg.getMessage().c_str(), fMsg.getMessage().length(), 0);
+		ret = send(client_sock, fMsg.getMessage().c_str(), fMsg.getMessage().length(), 0);
+
+		if (ret == -1)
+		{
+			int err = WSAGetLastError();
+			AhatLogger::ERR(CODE, "WSAGetLastError CODE = %d", err);
+		}
+
+		closeOsSocket(client_sock);
 		AhatLogger::IN_REQ_ERR_DEBUG(CODE, reqitem, fMsg.getMessage());
 		return 0;
 	}
@@ -163,7 +176,7 @@ void DummyServer::Enqueue(int client_sock, InReqItem reqitem)
 
 std::pair<int, InReqItem> DummyServer::Dequeue()
 {
-	auto socket = q.back();
+	auto socket = q.front();
 	q.pop();
 
 	return socket;

@@ -164,6 +164,7 @@ int main(int argc, char *argv[])
 
         if (bind(listen_sock[i], (struct sockaddr*)&serveraddr, sizeof(serveraddr)) == -1)
         {
+            std::cout<< "socket error\n";
             AhatLogger::ERR(CODE, "%d port socket error", port);
             AhatLogger::stop();
             return 0;
@@ -171,11 +172,10 @@ int main(int argc, char *argv[])
 
         if(listen(listen_sock[i], SOMAXCONN) == -1)
         {
-            AhatLogger::ERR(CODE, "%d port listen error", port);
+            std::cout << "listen error\n";
             AhatLogger::stop();
             return 0;
         }
-
 
 #ifdef _WIN32
         FD_SET(listen_sock[i], &new_fds);
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 #elif __linux__    
         eventn = epoll_wait(epollfd, events, EPOLL_SIZE, -1);
 #endif
-        for (i = 0; i < argc - 1; i++)
+        for (i = 0; i < port_size; i++)
         {
 #ifdef _WIN32
             if (FD_ISSET(listen_sock[i], &old_fds))
@@ -222,6 +222,8 @@ int main(int argc, char *argv[])
 #endif
             }
         }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
 #ifdef _WIN32
