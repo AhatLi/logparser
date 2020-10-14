@@ -89,12 +89,19 @@ int main(int argc, char *argv[])
         port_size++;
     }
 
+    std::shared_ptr<DBProcesser> dbp = std::make_shared<DBProcesser>();
+    std::thread tt(&DBProcesser::start, dbp);
+    tt.detach();
+
+
     int core = std::thread::hardware_concurrency();
     if (core < 2)
         core = 2;
     for (int i = 0; i < core - 1; i++)
     {
         auto server = std::make_shared<DummyServer>();
+        server->dbp = dbp;
+
         threads.push_back(server);
         std::thread t(&DummyServer::start, server);
         t.detach();

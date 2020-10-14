@@ -6,7 +6,7 @@ using namespace std;
 DBProcesser::DBProcesser()
 {
     config.readConfig("./LogParser");
-    this->q = new std::queue<std::string>();
+    tSize = 0;
 
     for (auto it = config.configmap.begin(); it != config.configmap.end(); it++)
     {
@@ -17,6 +17,9 @@ DBProcesser::DBProcesser()
             std::string line;
             std::string values = "(";
             std::vector<int> v;
+            tSize++;
+
+            tmap[tname] = std::make_shared<std::vector<std::string> >();
 
             while (std::getline(ss, line, ','))
             {
@@ -52,22 +55,19 @@ void DBProcesser::start()
 {
     while (1)
     {
-        if (!q->empty())
+        for (auto it = tmap.begin(); it != tmap.end(); it++)
         {
-            mutex.lock();
+            if (!it->second->empty())
+            {
+                mutex.lock();
+                auto qq = it->second;
+                it->second = std::make_shared<std::vector<std::string> >();
+                mutex.unlock();
 
-            std::vector<std::string>* qq = q;
-            q = new std::vector<std::string>();
-
-            mutex.unlock();
-
-            excuteSQL(qq);
-
+                excuteSQL(qq, it->first);
+            }
         }
-        else
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     return;
@@ -133,7 +133,7 @@ void DBProcesser::DBDisConnect()
     if (hDbc) SQLFreeHandle(SQL_HANDLE_DBC, hDbc);
     if (hEnv) SQLFreeHandle(SQL_HANDLE_ENV, hEnv);
 }
-
+/*
 // 해당되는 쿼리 구문 실행 및 출력
 bool DBProcesser::DBExcuteSQL(std::string values, std::string tName)
 {
@@ -167,15 +167,18 @@ bool DBProcesser::DBExcuteSQL(std::string values, std::string tName)
 
     return true;
 }
-
+*/
 
 // 해당되는 쿼리 구문 실행 및 출력
-bool DBProcesser::excuteSQL(std::vector<std::string>* v)
+bool DBProcesser::excuteSQL(std::shared_ptr<std::vector<std::string> > v, std::string tName)
 {
-    for (int i = 0; i < v->size(); i++)
+    std::string values = "";
+    for (auto it = v->begin(); it != v->end(); it++)
     {
-
+        values += it->c_str();
+        values += ", ";
     }
+    values = values.substr(0, values.size() - 1);
 
     RETCODE retcode;
     InDBtem item;

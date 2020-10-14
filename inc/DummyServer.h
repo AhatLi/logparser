@@ -52,8 +52,8 @@ class DummyServer
 	HTTPMessage sMsg;
 	HTTPMessage fMsg;
 	logParser parser;
-	DBProcesser dbp;
 public:
+	std::shared_ptr<DBProcesser> dbp;
 	int start();
 	void Enqueue(int client_sock, InReqItem reqitem);
 	std::pair<int, InReqItem> Dequeue();

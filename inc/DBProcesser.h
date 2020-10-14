@@ -30,14 +30,16 @@ class DBProcesser
 	void ErrorMSG();
 	std::map< std::string, std::string > cmap;
 public:
-	static std::mutex mutex;
+	std::mutex mutex;
 	void start();
 	DBProcesser();
 	bool DBConnect();
 	void DBDisConnect();
-	bool DBExcuteSQL(std::string sql, std::string tName);
-	bool DBProcesser::excuteSQL(std::vector<std::string>* v);
-	std::vector<std::string>* q = NULL;
+//	bool DBExcuteSQL(std::string sql, std::string tName);
+	bool excuteSQL(std::shared_ptr<std::vector<std::string> > v, std::string tName);
+
+	std::map<std::string, std::shared_ptr<std::vector<std::string> > > tmap;
+	int tSize;
 };
 
 #endif
