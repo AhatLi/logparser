@@ -183,7 +183,7 @@ void AhatLogger::logWrite()
 	
     if (f.fail()) 
 	{
-		std::cout<<"logWrite Fail!"<<path.c_str()<<"\n";
+		std::cout<<"Log Write Fail ! "<< filepath.c_str()<<"\n";
 		return;
 	}
 	

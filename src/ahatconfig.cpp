@@ -41,7 +41,7 @@ bool AhatConfig::readConfig(const char* path)
 
 	if (inFile.fail())
 	{
-		std::cout << "logWrite Fail!" << configPath.c_str() << "\n";
+		std::cout << "Read Config Fail !! " << configPath.c_str() << "\n";
 		return false;
 	}
 
