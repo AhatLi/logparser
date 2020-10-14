@@ -47,8 +47,11 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 
 	if (ret == -1)
 	{
+#ifdef _WIN32
 		int err = WSAGetLastError();
 		AhatLogger::ERR(CODE, "WSAGetLastError CODE = %d", err);
+#elif __linux__   
+#endif
 	}
 
 	std::stringstream ss(reqitem.in_req_port);
@@ -62,8 +65,11 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 
 		if (ret == -1)
 		{
+#ifdef _WIN32
 			int err = WSAGetLastError();
 			AhatLogger::ERR(CODE, "WSAGetLastError CODE = %d", err);
+#elif __linux__   
+#endif
 		}
 
 		closeOsSocket(client_sock);
