@@ -8,6 +8,8 @@ std::string		AhatLogger::path;
 std::string		AhatLogger::name;
 std::mutex		AhatLogger::mutex;
 int				AhatLogger::level;
+std::string		AhatLogger::curPath;
+std::ofstream	AhatLogger::f;
 
 
 std::string code(std::string file, std::string func, int line)
@@ -122,13 +124,41 @@ std::string AhatLogger::getDate()
 
 void AhatLogger::start()
 {
+	curPath = "";
 	if(isStarted == false)
 	{
 		isStarted = true;
+		logOpen();
+
 		q = new std::queue< std::pair<std::string, std::string> >();
 		std::thread t(&AhatLogger::run);
 		t.detach();
 	}
+}
+
+bool AhatLogger::logOpen()
+{
+	std::string date = getDate();
+	std::string filepath = "";
+
+	filepath += path;
+	if (filepath != "")
+		filepath += "/";
+	filepath += name;
+	filepath += date;
+	filepath += ".log";
+	curPath = filepath;
+
+	f.open(filepath, std::ios::out | std::ios::app);
+
+	return true;
+}
+
+bool AhatLogger::logClose()
+{
+	f.close();
+
+	return true;
 }
 
 void AhatLogger::stop()
@@ -155,8 +185,13 @@ void AhatLogger::run()
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			continue;
 		}
-		
-		logWrite();
+		else
+		{
+			if (!logWrite())
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+		}
 	}
 	if(q->size())
 	{
@@ -166,10 +201,9 @@ void AhatLogger::run()
 	isFinished = true;
 }
 
-void AhatLogger::logWrite()
+bool AhatLogger::logWrite()
 {
 	std::string date = getDate();
-	std::ofstream f;
 	std::string filepath = "";
 	
 	filepath += path;
@@ -179,12 +213,10 @@ void AhatLogger::logWrite()
 	filepath += date;
 	filepath += ".log";
 
-	f.open(filepath, std::ios::out | std::ios::app);
-	
-    if (f.fail()) 
+	if (curPath.compare(filepath) != 0)
 	{
-		std::cout<<"Log Write Fail ! "<< filepath.c_str()<<"\n";
-		return;
+		logClose();
+		logOpen();
 	}
 	
 	mutex.lock();
@@ -205,7 +237,7 @@ void AhatLogger::logWrite()
 	
 	delete qq;
 		
-	f.close();
+	return true;
 }
 
 void AhatLogger::setting(std::string path, std::string filename, int level)

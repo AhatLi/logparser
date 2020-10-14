@@ -49,10 +49,12 @@ class AhatLogger
 {
 private:
 	static std::string path;
+	static std::string curPath;
 
 	static std::string name;
 	static std::string version;
 	static std::string host;
+	static std::ofstream f;
 	
 	static std::queue< std::pair<std::string, std::string> > *q;
 	static bool isStarted;
@@ -65,7 +67,10 @@ private:
 	static int makeDirectory(const char *full_path);
 	static bool existDirectory(const char *path);
 	
-	static void logWrite();
+	static bool logWrite();
+
+	static bool logOpen();
+	static bool logClose();
 public:
 	static std::mutex mutex;
 
