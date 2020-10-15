@@ -178,7 +178,7 @@ bool DBProcesser::excuteSQL(std::shared_ptr<std::vector<std::string> > v, std::s
         values += it->c_str();
         values += ", ";
     }
-    values = values.substr(0, values.size() - 1);
+    values = values.substr(0, values.length() - 2);
 
     RETCODE retcode;
     InDBtem item;

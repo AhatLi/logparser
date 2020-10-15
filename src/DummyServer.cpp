@@ -11,7 +11,6 @@ int DummyServer::start()
 	{
 		if (!q.empty())
 		{
-			AhatLogger::INFO(CODE, "test 1 %s", getCurTime().c_str());
 			auto data = Dequeue();
 			client_connect(data.first, data.second);
 		}
@@ -26,7 +25,6 @@ int DummyServer::start()
 
 int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 {
-	AhatLogger::INFO(CODE, "test 2 %s", getCurTime().c_str());
 	std::string rBody = "";
 	char buf[1024+1];
 	char header[1024];
@@ -34,9 +32,7 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 
 	memset(buf, 0, 1024 + 1);
 	memset(header, 0, 1024);
-	AhatLogger::INFO(CODE, "test 3 %s", getCurTime().c_str());
 	int ret = recv(client_sock, buf, 1024, 0);
-	AhatLogger::INFO(CODE, "test 4 %s", getCurTime().c_str());
 	while (1)
 	{
 		rBody += buf;
@@ -48,7 +44,6 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 		memset(buf, 0, 1024 + 1);
 		ret = recv(client_sock, buf, 1024, 0);
 	}
-	AhatLogger::INFO(CODE, "test 5 %s", getCurTime().c_str());
 
 	if (ret == -1)
 	{
@@ -58,7 +53,6 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 #elif __linux__   
 #endif
 	}
-	AhatLogger::INFO(CODE, "test 6 %s", getCurTime().c_str());
 
 	std::stringstream ss(reqitem.in_req_port);
 	int port;
@@ -82,25 +76,20 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 		AhatLogger::IN_REQ_ERR_DEBUG(CODE, reqitem, fMsg.getMessage());
 		return 0;
 	}
-	AhatLogger::INFO(CODE, "test 7 %s", getCurTime().c_str());
 
 	send(client_sock, sMsg.getMessage().c_str(), sMsg.getMessage().length(), 0);
 	closeOsSocket(client_sock);
-	AhatLogger::INFO(CODE, "test 8 %s", getCurTime().c_str());
 	strncat(header, rBody.substr(0, rBody.find("\r\n\r\n")).c_str(), rBody.find("\r\n\r\n"));
 	rBody = rBody.substr(rBody.find("\r\n\r\n") + 4);
 
-	AhatLogger::INFO(CODE, "test 9 %s", getCurTime().c_str());
 	makeResult(header, rBody, port, message, reqitem);
     AhatLogger::IN_REQ_DEBUG(CODE, reqitem, sMsg.getMessage());
-	AhatLogger::INFO(CODE, "test 15 %s", getCurTime().c_str());
 
 	return 0;
 }
 
 std::string DummyServer::makeResult(char* header, std::string body, int port, HTTPMessage message, InReqItem& reqitem)
 {
-	AhatLogger::INFO(CODE, "test 10 %s", getCurTime().c_str());
 	std::string result;
 
 	char* saveptr1;
@@ -134,7 +123,6 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 		message.setHeaderCode("400");
 		return message.getMessage();
 	}
-	AhatLogger::INFO(CODE, "test 11 %s", getCurTime().c_str());
 	
 	tok = strtok_all(NULL, "? \n", &saveptr1);
 	if( !tok )
@@ -152,25 +140,24 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 		message.setHeaderCode("400");
 		return message.getMessage();
 	}
-	AhatLogger::INFO(CODE, "test 12 %s", getCurTime().c_str());
 
 	tok = strtok_all(NULL, "? \n/", &saveptr1);
 	std::istringstream ss(body);
 	std::string line;
 
 	std::string sql = "";
-	AhatLogger::INFO(CODE, "test 13 %s", getCurTime().c_str());
 	while (std::getline(ss, line, '\n'))
 	{
-		AhatLogger::INFO(CODE, "test 13-1 %s", getCurTime().c_str());
 		if (line.empty())
 			continue;
 
-		AhatLogger::INFO(CODE, "test 13-2 %s", getCurTime().c_str());
 		sql = parser.parsing(line.c_str(), url);
-		AhatLogger::INFO(CODE, "test 13-3 %s", getCurTime().c_str());
+
+		dbp->mutex.lock();
+
 		dbp->tmap[url]->push_back(sql);
-		AhatLogger::INFO(CODE, "test 13-4 %s", getCurTime().c_str());
+
+		dbp->mutex.unlock();
 		/*
 		sql += parser.parsing(line.c_str());
 		sql += ";\n";
@@ -184,7 +171,6 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 		}
 		*/
 	}
-	AhatLogger::INFO(CODE, "test 14 %s", getCurTime().c_str());
 	
 	result = sMsg.getMessage();
 	return "";
