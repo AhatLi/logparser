@@ -29,8 +29,12 @@ class DBProcesser
 	void Cleanup();
 	void ErrorMSG();
 	std::map< std::string, std::string > cmap;
-public:
+
+	std::map<std::string, std::shared_ptr<std::vector<std::string> > > tmap;
+	std::map<std::string, int > smap;
+	int tSize;
 	std::mutex mutex;
+public:
 	void start();
 	DBProcesser();
 	bool DBConnect();
@@ -38,8 +42,7 @@ public:
 //	bool DBExcuteSQL(std::string sql, std::string tName);
 	bool excuteSQL(std::shared_ptr<std::vector<std::string> > v, std::string tName);
 
-	std::map<std::string, std::shared_ptr<std::vector<std::string> > > tmap;
-	int tSize;
+	bool Enqueue(std::string tname, std::string value);
 };
 
 #endif

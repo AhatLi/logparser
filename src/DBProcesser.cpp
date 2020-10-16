@@ -20,6 +20,7 @@ DBProcesser::DBProcesser()
             tSize++;
 
             tmap[tname] = std::make_shared<std::vector<std::string> >();
+            smap[tname] = 0;
 
             while (std::getline(ss, line, ','))
             {
@@ -57,11 +58,13 @@ void DBProcesser::start()
     {
         for (auto it = tmap.begin(); it != tmap.end(); it++)
         {
-            if (!it->second->empty())
+            if(smap[it->first] > 0)
             {
+                std::shared_ptr<std::vector<std::string> > qq = NULL;
                 mutex.lock();
-                auto qq = it->second;
+                qq = it->second;
                 it->second = std::make_shared<std::vector<std::string> >();
+                smap[it->first] = 0;
                 mutex.unlock();
 
                 excuteSQL(qq, it->first);
@@ -207,6 +210,24 @@ bool DBProcesser::excuteSQL(std::shared_ptr<std::vector<std::string> > v, std::s
         }
     }
     AhatLogger::DB_DEBUG(CODE, item, "true");
+
+    return true;
+}
+
+
+bool DBProcesser::Enqueue(std::string tname, std::string value)
+{
+    if (tmap.find(tname) == tmap.end())
+    {
+        return false;
+    }
+
+    mutex.lock();
+
+    tmap[tname]->push_back(value);
+    smap[tname]++;
+
+    mutex.unlock();
 
     return true;
 }

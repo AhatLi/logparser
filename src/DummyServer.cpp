@@ -153,11 +153,11 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 
 		sql = parser.parsing(line.c_str(), url);
 
-		dbp->mutex.lock();
-
-		dbp->tmap[url]->push_back(sql);
-
-		dbp->mutex.unlock();
+		if (!dbp->Enqueue(url, sql))
+		{
+			message.setHeaderCode("400");
+			return message.getMessage();
+		}
 		/*
 		sql += parser.parsing(line.c_str());
 		sql += ";\n";
