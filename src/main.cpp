@@ -21,7 +21,7 @@
 int main(int argc, char *argv[]) 
 {
 #ifdef _WIN32
- //   unsigned int fd_num = 0;
+    unsigned int fd_num = 0;
 #elif __linux__
 	struct rlimit lim;
 	getrlimit(RLIMIT_CORE, &lim);
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     WSADATA wsaData;
     int addrlen;
     SOCKADDR_IN serveraddr, clientaddr;
-//    fd_set old_fds, new_fds;
+    fd_set old_fds, new_fds;
 
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
     {
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         AhatLogger::stop();
         return 0;
     }
- //   FD_ZERO(&new_fds);
+    FD_ZERO(&new_fds);
 #elif __linux__
     struct sockaddr_in serveraddr, clientaddr;
     socklen_t addrlen;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
         if (bind(listen_sock[i], (struct sockaddr*)&serveraddr, sizeof(serveraddr)) == -1)
         {
             std::cout<< "socket error\n";
-            AhatLogger::ERR(CODE, "%d port socket error", port);
+            AhatLogger::ERR(CODE, "%d port socket error", port[i]);
             AhatLogger::stop();
             return 0;
         }
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
         }
 
 #ifdef _WIN32
- //       FD_SET(listen_sock[i], &new_fds);
+        FD_SET(listen_sock[i], &new_fds);
 #elif __linux__    
         ev.events = EPOLLIN;
         ev.data.fd = listen_sock[i];
@@ -196,15 +196,15 @@ int main(int argc, char *argv[])
     while (1)
     {
 #ifdef _WIN32
- //       old_fds = new_fds;
- //       fd_num = select(0, &old_fds, NULL, NULL, NULL);
+        old_fds = new_fds;
+        fd_num = select(0, &old_fds, NULL, NULL, NULL);
 #elif __linux__    
         eventn = epoll_wait(epollfd, events, EPOLL_SIZE, -1);
 #endif
         for (i = 0; i < port_size; i++)
         {
 #ifdef _WIN32
-//            if (FD_ISSET(listen_sock[i], &old_fds))
+            if (FD_ISSET(listen_sock[i], &old_fds))
             {
 #elif __linux__    
             for (j = 0; j < eventn; j++)

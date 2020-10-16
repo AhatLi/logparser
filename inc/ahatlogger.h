@@ -56,7 +56,7 @@ private:
 	static std::string host;
 	static std::ofstream f;
 	
-	static std::queue< std::pair<std::string, std::string> > *q;
+	static std::shared_ptr< std::queue< std::pair<std::string, std::string> > > q;
 	static bool isStarted;
 	static bool isFinished;
 	static int level;

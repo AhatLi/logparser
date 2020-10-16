@@ -1,7 +1,7 @@
 #include "ahatlogger.h"
 #include <algorithm>
 
-std::queue< std::pair<std::string, std::string> > *	AhatLogger::q = NULL;
+std::shared_ptr< std::queue< std::pair<std::string, std::string> > > AhatLogger::q = NULL;
 bool			AhatLogger::isStarted = false;
 bool			AhatLogger::isFinished = false;
 std::string		AhatLogger::path;
@@ -130,7 +130,7 @@ void AhatLogger::start()
 		isStarted = true;
 		logOpen();
 
-		q = new std::queue< std::pair<std::string, std::string> >();
+		q = std::make_shared<std::queue< std::pair<std::string, std::string> > >();
 		std::thread t(&AhatLogger::run);
 		t.detach();
 	}
@@ -150,6 +150,10 @@ bool AhatLogger::logOpen()
 	curPath = filepath;
 
 	f.open(filepath, std::ios::out | std::ios::app);
+	if (f.fail())
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -221,8 +225,8 @@ bool AhatLogger::logWrite()
 	
 	mutex.lock();
 
-	std::queue< std::pair<std::string, std::string> > *qq = q;
-	q = new std::queue< std::pair<std::string, std::string> >();
+	auto qq = q;
+	q = std::make_shared<std::queue< std::pair<std::string, std::string> > >();
 
 	mutex.unlock();
 
@@ -232,10 +236,9 @@ bool AhatLogger::logWrite()
 		std::pair<std::string, std::string>  item = qq->front();
 		qq->pop();
 
-		f << item.first<< "," << getCurTime() << item.second << "\n";
+		f << item.first << "," << getCurTime() << item.second << "\n";
 	}
-	
-	delete qq;
+	f.flush();
 		
 	return true;
 }
@@ -257,7 +260,7 @@ void AhatLogger::setting(std::string path, std::string filename, int level)
 		std::wstring ws(tmp);
 		buf = buf.substr(0, buf.find_last_of("\\"));
 		*/
-		std::string buf("./");
+		std::string buf(".");
 	#endif
 #elif __linux__
 		char buf[256];
@@ -300,7 +303,7 @@ void AhatLogger::INFO(std::string src_file, const char* body, ...)
 	vsprintf_s(tmp, len, body, arglist);
 	
 	AhatLogItemInfo log(src_file, tmp);
-	delete tmp;
+	delete []tmp;
 	va_end(arglist);
 	
 	mutex.lock();
@@ -322,7 +325,7 @@ void AhatLogger::ERR(std::string src_file, const char* body, ...)
 	vsprintf_s(tmp, len, body, arglist);
 	
 	AhatLogItemError log(src_file, tmp);
-	delete tmp;
+	delete []tmp;
 	va_end(arglist);
 	
 	mutex.lock();
@@ -344,7 +347,7 @@ void AhatLogger::CUSTOM(std::string src_file, std::string custom, const char* bo
 	vsprintf_s(tmp, len, body, arglist);
 	
 	AhatLogItemCustom log(src_file, tmp);
-	delete tmp;
+	delete []tmp;
 	va_end(arglist);
 	
 	mutex.lock();
@@ -370,7 +373,7 @@ void AhatLogger::DEBUG(std::string src_file, const char* body, ...)
 	vsprintf_s(tmp, len, body, arglist);
 	
 	AhatLogItemDebug log(src_file, tmp);
-	delete tmp;
+	delete []tmp;
 	va_end(arglist);
 	
 	mutex.lock();
