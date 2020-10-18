@@ -8,6 +8,7 @@ DBProcesser::DBProcesser()
     config.readConfig("./LogParser");
     tSize = 0;
 
+    //처리 속도를 올리기 위해 DB 관련 설정을 파싱하여 SQL에 사용되는 데이터를 미리 로드함
     for (auto it = config.configmap.begin(); it != config.configmap.end(); it++)
     {
         if (it->first.find("ColumnName") != std::string::npos)
@@ -54,6 +55,8 @@ DBProcesser::DBProcesser()
 
 void DBProcesser::start()
 {
+    //테이블 별로 데이터를 확인하여 데이터가 존재할 경우 처리함
+    //smap을 사용하는 이유는 vector의 empty 함수가 thread safe 하지 않기 때문
     while (1)
     {
         for (auto it = tmap.begin(); it != tmap.end(); it++)
@@ -61,6 +64,8 @@ void DBProcesser::start()
             if(smap[it->first] > 0)
             {
                 std::shared_ptr<std::vector<std::string> > qq = NULL;
+
+                //포인터를 사용하여 락이 걸리는 시간을 최대한 줄였음
                 mutex.lock();
                 qq = it->second;
                 it->second = std::make_shared<std::vector<std::string> >();
@@ -76,6 +81,7 @@ void DBProcesser::start()
     return;
 }
 
+//DB 관련 에러메세지 출력
 void DBProcesser::ErrorMSG()
 {
     SQLSMALLINT msg_len = 0;
@@ -84,6 +90,7 @@ void DBProcesser::ErrorMSG()
 
     SQLGetDiagRec(SQL_HANDLE_DBC, hDbc, 1, sql_state, &native_error, message, 256, &msg_len);
     std::cout << message << endl;
+    AhatLogger::ERR(CODE, "DB Error msg : %s", message);
 
     exit(0);
 }
@@ -205,7 +212,7 @@ bool DBProcesser::excuteSQL(std::shared_ptr<std::vector<std::string> > v, std::s
         if (SQL_SUCCESS == SQLError(hEnv, hDbc, hStmt, NULL, &errNo, errMsg, 1024, &msgLength))
         {
             printf(" ERR_-%ld : %s\n", errNo, errMsg);
-            AhatLogger::DB_ERR_DEBUG(CODE, item, std::string((char*)errMsg));
+            AhatLogger::DB_ERR(CODE, item, std::string((char*)errMsg));
             return false;
         }
     }

@@ -2,11 +2,12 @@
 #include "HTTPMessage.h"
 
 
-int DummyServer::start() 
+int LogProcesser::start() 
 {
 	sMsg.setHeaderCode("200");
 	fMsg.setHeaderCode("400");
 
+	//입력 대기
 	while (1)
 	{
 		if (!q.empty())
@@ -23,7 +24,7 @@ int DummyServer::start()
 	return 0;
 }
 
-int DummyServer::client_connect(int client_sock, InReqItem reqitem)
+int LogProcesser::client_connect(int client_sock, InReqItem reqitem)
 {
 	std::string rBody = "";
 	char buf[1024+1];
@@ -32,6 +33,8 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 
 	memset(buf, 0, 1024 + 1);
 	memset(header, 0, 1024);
+
+	//소켓에서 전송된 데이터 입력받음
 	int ret = recv(client_sock, buf, 1024, 0);
 	while (1)
 	{
@@ -58,6 +61,7 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 	int port;
 	ss >> port;
 
+	//올바른 HTTP 요청인지 확인하기 위해 body 확인
 	reqitem.in_req_body = rBody;
 	if (rBody.empty() || rBody.find("\r\n\r\n") == std::string::npos)
 	{
@@ -77,6 +81,7 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 		return 0;
 	}
 
+	//빠른 데이터 처리를 위해 HTTP 요청인지만 확인 후 응답을 보냄
 	send(client_sock, sMsg.getMessage().c_str(), sMsg.getMessage().length(), 0);
 	closeOsSocket(client_sock);
 	strncat(header, rBody.substr(0, rBody.find("\r\n\r\n")).c_str(), rBody.find("\r\n\r\n"));
@@ -88,7 +93,7 @@ int DummyServer::client_connect(int client_sock, InReqItem reqitem)
 	return 0;
 }
 
-std::string DummyServer::makeResult(char* header, std::string body, int port, HTTPMessage message, InReqItem& reqitem)
+std::string LogProcesser::makeResult(char* header, std::string body, int port, HTTPMessage message, InReqItem& reqitem)
 {
 	std::string result;
 
@@ -135,6 +140,7 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 	reqitem.in_req_url = std::string(tok);
 	url = url.substr(1);
 
+	//URL이 테이블 명이므로 비어있을 경우 실패
 	if (url.empty())
 	{
 		message.setHeaderCode("400");
@@ -146,6 +152,8 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 	std::string line;
 
 	std::string sql = "";
+
+	//여러 건의 데이터를 줄바꿈으로 전송받기 위해 처리하는 부분
 	while (std::getline(ss, line, '\n'))
 	{
 		if (line.empty())
@@ -153,6 +161,7 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 
 		sql = parser.parsing(line.c_str(), url);
 
+		//DBProcesser 로 파싱된 데이터 전송
 		if (!dbp->Enqueue(url, sql))
 		{
 			message.setHeaderCode("400");
@@ -176,7 +185,7 @@ std::string DummyServer::makeResult(char* header, std::string body, int port, HT
 	return "";
 }
 
-void DummyServer::Enqueue(int client_sock, InReqItem reqitem)
+void LogProcesser::Enqueue(int client_sock, InReqItem reqitem)
 {
 	std::pair<int, InReqItem> p;
 	p.first = client_sock;
@@ -185,7 +194,7 @@ void DummyServer::Enqueue(int client_sock, InReqItem reqitem)
 	q.push(p);
 }
 
-std::pair<int, InReqItem> DummyServer::Dequeue()
+std::pair<int, InReqItem> LogProcesser::Dequeue()
 {
 	auto socket = q.front();
 	q.pop();

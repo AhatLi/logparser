@@ -42,7 +42,7 @@
 #include "LogParser.h"
 #include "DBProcesser.h"
 
-class DummyServer
+class LogProcesser
 {
 	std::string makeResult(char* header, std::string body, int port, HTTPMessage message, InReqItem& reqitem);
 	int client_connect(int client_sock, InReqItem reqitem);
